@@ -1,0 +1,18 @@
+<!doctype html>
+<html ng-app='main_app'>
+  <head>
+    <!-- inject:css -->
+    <!-- endinject -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+    <!-- inject:js -->
+    <!-- endinject -->
+  </head>
+  <body ng-controller="MainController as m">
+    <header>
+      <h1>Kickstartr v2</h1>
+      <h2>{{m.message}}</h2>
+    </header>
+    <article ng-view></article>
+  </body>
+</html>
