@@ -1,0 +1,13 @@
+language: go
+go:
+  - 1.5.1
+before_script:
+  - npm install
+  - jspm dl-loader
+  - jspm install
+install:
+  - go get github.com/golang/glog
+  - go get github.com/gorilla/mux
+script: grunt dist
+notifications:
+  email: false
