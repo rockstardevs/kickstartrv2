@@ -1,4 +1,4 @@
-# Kickstartr v2.0
+# Kickstartr v2.0 [![Build Status](https://travis-ci.org/rockstardevs/kickstartrv2.svg)](https://travis-ci.org/rockstardevs/kickstartrv2)
 Kickstartr is a boilerplate webapp built with angularjs, ES6 amd gulp based build system.
 
 ### To Use
