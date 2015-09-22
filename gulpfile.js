@@ -75,8 +75,8 @@ gulp.task('binary:dev', ['replace'], function() {
 });
 
 gulp.task('binary:dist', ['replace'], function() {
-  var src_file = path.join(conf.stage_dir, 'server', '*.go');
-  var dest_file = path.join(conf.dist_dir, pkg.name);
+  var src_file = path.join(path.basename(path.dirname(__filename)), conf.stage_dir, 'server');
+  var dest_file = path.join(conf.dist_dir, pkg.name + '-' + pkg.version);
   var build = child.spawnSync('go', ['build', '-o', dest_file, src_file]);
   if (build.stderr.length) {
     var lines = build.stderr.toString()
@@ -107,10 +107,27 @@ gulp.task('external:dev', function(cb) {
   cb();
 });
 
+gulp.task('external:dist', function(cb) {
+  merge(conf.external_js)
+    .pipe(gulp.dest(path.join(conf.dist_dir, 'static', 'js')));
+  merge(conf.external_css)
+    .pipe(gulp.dest(path.join(conf.dist_dir, 'static', 'css')));
+  merge(conf.external_fonts)
+    .pipe(gulp.dest(path.join(conf.dist_dir, 'static', 'fonts')));
+  cb();
+});
+
 
 // Static Resources
 gulp.task('static:dev', function() {
   var dest = path.join(conf.build_dir, 'static');
+  return gulp.src('static/**')
+    .pipe(gulp.dest(dest))
+    .pipe(reload());
+});
+
+gulp.task('static:dist', function() {
+  var dest = path.join(conf.dist_dir, 'static');
   return gulp.src('static/**')
     .pipe(gulp.dest(dest))
     .pipe(reload());
@@ -122,6 +139,13 @@ gulp.task('js:dev', function() {
   var dest = conf.build_dir + '/static/js/' + pkg.name + '-' + pkg.version + '.js';
   return gulp.src('src/client/*.js')
     .pipe(shell(['jspm bundle-sfx --no-mangle --skip-source-maps src/client/app ' + dest]))
+    .pipe(reload());
+});
+
+gulp.task('js:dist', function() {
+  var dest = conf.dist_dir + '/static/js/' + pkg.name + '-' + pkg.version + '.js';
+  return gulp.src('src/client/*.js')
+    .pipe(shell(['jspm bundle-sfx --minify src/client/app ' + dest]))
     .pipe(reload());
 });
 
@@ -140,7 +164,7 @@ gulp.task('css:dist', function() {
     .pipe(less())
     .pipe(minifyCSS())
     .pipe(concat(pkg.name + '-' + pkg.version + '.min.css'))
-    .pipe(gulp.dest(conf.dist_dir + '/static'));
+    .pipe(gulp.dest(conf.dist_dir + '/static/css'));
 });
 
 
@@ -158,9 +182,27 @@ gulp.task('templates:dev', function() {
     .pipe(reload());
 });
 
+gulp.task('templates:dist', function() {
+  var srcs = gulp.src([
+    conf.dist_dir + '/static/js/*.js',
+    conf.dist_dir + '/static/css/*.css'
+  ]);
+  return gulp.src('src/templates/index.html')
+    .pipe(inject(srcs, {ignorePath: conf.build_dir}))
+    .pipe(rmcomments())
+    .pipe(rmlines())
+    .pipe(gulp.dest(conf.dist_dir + '/templates'));
+});
+
+
 gulp.task('partials:dev', function() {
   return gulp.src('**/*.ng', {cwd: 'src/templates'})
     .pipe(gulp.dest(conf.build_dir + '/static/partials'))
+});
+
+gulp.task('partials:dist', function() {
+  return gulp.src('**/*.ng', {cwd: 'src/templates'})
+    .pipe(gulp.dest(conf.dist_dir + '/static/partials'))
 });
 
 
@@ -205,7 +247,7 @@ gulp.task('build', sync([
 // Build production dist package.
 gulp.task('dist', sync([
   'clean',
-  ['binary:dist', 'external:dist', 'static:dist', 'css:dist', 'js:dev'],
+  ['binary:dist', 'external:dist', 'static:dist', 'css:dist', 'js:dist', 'partials:dist'],
   'templates:dist'
 ]));
 

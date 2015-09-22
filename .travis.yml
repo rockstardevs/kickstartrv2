@@ -8,6 +8,6 @@ before_script:
 install:
   - go get github.com/golang/glog
   - go get github.com/gorilla/mux
-script: grunt dist
+script: gulp dist
 notifications:
   email: false
